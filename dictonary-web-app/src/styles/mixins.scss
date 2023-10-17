@@ -1,0 +1,149 @@
+@use "variables" as *;
+
+$breakpoints: (
+  xs: (
+    min: $mq-xs,
+    max: $mq-xs,
+  ),
+  sm: (
+    min: $mq-sm,
+    max: $mq-sm,
+  ),
+  md: (
+    min: $mq-md,
+    max: $mq-md,
+  ),
+  lg: (
+    min: $mq-lg,
+    max: $mq-lg,
+  ),
+  xl: (
+    min: $mq-xl,
+    max: $mq-xl,
+  ),
+  xxl: (
+    min: $mq-xxl,
+    max: $mq-xxl,
+  ),
+);
+
+@mixin mq($name, $type: min) {
+  @if map-has-key($breakpoints, $name) {
+    $query: map-get($breakpoints, $name);
+
+    @if $type == min {
+      @media screen and (min-width: #{inspect(map-get($query, 'min'))}) {
+        @content;
+      }
+    } @else if $type == max {
+      @media screen and (max-width: #{inspect(map-get($query, 'max'))}) {
+        @content;
+      }
+    } @else {
+      @warn "Invalid type parameter. Please use 'min' or 'max'.";
+    }
+  } @else {
+    @warn "Unfortunately, no value could be retrieved from `breakpoints`. " + 
+            "Please make sure it is defined in `$breakpoints` map.";
+  }
+}
+
+@mixin square($size) {
+  width: $size;
+  height: $size;
+}
+@mixin circle($size) {
+  @include square($size);
+  border-radius: 50%;
+}
+
+@mixin page {
+  max-width: $mq-md;
+  margin: auto;
+  padding: 0 $space-sm;
+  transition: 0.3s ease padding;
+  @include mq(md) {
+    padding: 0 $space-lg;
+  }
+}
+@mixin items-grid {
+  margin-top: $space-l;
+  display: grid;
+  justify-content: space-between;
+  transition: grid-template-columns 0.3s ease;
+  grid-template-columns: repeat(3, minmax(0, 360px));
+  grid-row-gap: $space-l;
+  grid-column-gap: $space-xs;
+  @media (min-width: 1500px) {
+    grid-template-columns: repeat(4, minmax(0, 360px));
+  }
+
+  @media (max-width: 900px) {
+    grid-template-columns: repeat(2, minmax(0, 360px));
+  }
+}
+@mixin image-container {
+  position: relative;
+  background: $card-image-bg;
+
+  &::after {
+    content: "";
+    padding-top: 100%;
+    display: block;
+  }
+}
+
+@mixin image {
+  width: 100%;
+  height: 100%;
+  position: absolute;
+
+  z-index: 1;
+  top: 0;
+  left: 0;
+}
+
+@mixin hover-brand {
+  transition: 0.3s ease color;
+  &:hover {
+    color: $brand;
+  }
+}
+
+@function themed($key) {
+  @return map-get($theme-map, $key);
+}
+
+@function build-theme-map($theme, $map) {
+  $theme-map: () !global;
+  @each $key, $submap in $map {
+    $value: map-get(map-get($themes, $theme), "#{$key}");
+    $theme-map: map-merge(
+      $theme-map,
+      (
+        $key: $value,
+      )
+    ) !global;
+  }
+  @return $theme-map;
+}
+
+@mixin themify($themes: $themes) {
+  @each $theme, $map in $themes {
+    .theme_#{$theme} & {
+      $theme-map: build-theme-map($theme, $map);
+      @content;
+      $theme-map: null !global;
+    }
+  }
+}
+
+@mixin themify-self($themes: $themes) {
+  @each $theme, $map in $themes {
+    &.theme_#{$theme} {
+      $theme-map: build-theme-map($theme, $map);
+      @content;
+      $theme-map: null !global;
+    }
+  }
+}

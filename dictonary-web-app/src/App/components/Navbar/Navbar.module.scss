@@ -1,0 +1,42 @@
+@use "variables" as *;
+@use "mixins" as *;
+
+.nav {
+  height: $nav-height;
+  @include page;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  &__book {
+    @include square($nav-logo);
+  }
+
+  &__theme-toggler {
+    position: relative;
+    @include circle($nav-theme-toggler);
+    border: transparent;
+    cursor: pointer;
+    transition: all 0.3s;
+    @include themify {
+      background-color: themed(theme-toggler-color);
+    }
+
+    &__circle {
+      position: absolute;
+      top: 0;
+      right: 0;
+      @include circle($nav-theme-toggler-circle);
+
+      @include themify {
+        background-color: themed(theme-toggler-circle-color);
+      }
+    }
+  }
+}
+
+.canvas {
+  position: absolute;
+  top: 0;
+  z-index: 100;
+  width: 100%;
+}
